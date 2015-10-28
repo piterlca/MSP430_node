@@ -8,14 +8,19 @@
 #ifndef MEASURINGANDPRESENTING_H_
 #define MEASURINGANDPRESENTING_H_
 
-#include "MPU-6050/MPU-6050.h"
+#include "Wrappers/MPU_wrapper.h"
 
 typedef enum {MEASURE, REPORT, IDLE} States;
 extern volatile States state;
 extern volatile States last_state;
 
+typedef struct TaskMgrHandles
+{
+	MPU_wrapper* mpu;
+}TaskMgrHandles;
+
 void cycle();
 
-//void UART_print(MPUData* sensorData);
+TaskMgrHandles* global_init(TaskMgrHandles* handles);
 
 #endif /* MEASURINGANDPRESENTING_H_ */

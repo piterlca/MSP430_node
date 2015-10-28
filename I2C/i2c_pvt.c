@@ -1,30 +1,30 @@
-/*
- * i2c.c
-
- *
- *  Created on: 8 paü 2015
- *      Author: Piotr
- */
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
 #include <msp430fr4133.h>
 #include "i2c_definitions.h"
 #include "i2c_api.h"
+#include "i2c_pvt.h"
 
-static I2C_STATUS i2c_send_pvt(i2c_handle* i2c_h, int8_t* buf, uint8_t len, uint8_t stop);
+static I2C_STATUS i2c_send_pvt(i2c_handle i2c_h, int8_t* buf, uint8_t len, uint8_t stop);
 
-i2c_handle* get_i2c_h(i2c_handle* i2c_h)
+i2c_handle get_i2c_h(i2c_handle i2c_h)
 {
-	static i2c_handle* i2c = NULL;
+	static i2c_handle i2c = NULL;
 
 	if(NULL != i2c_h)
+	{
 		i2c = i2c_h;
+		return NULL;
+	}
 
 	else
+	{
 		return i2c;
+	}
 }
 
-I2C_STATUS i2c_send(i2c_handle* i2c_h, i2c_msg_str* msg)
+I2C_STATUS i2c_send(i2c_handle i2c_h, i2c_msg_str* msg)
 {
 	I2C_STATUS status;
 	UCB0I2CSA = msg->destination_address;
@@ -38,7 +38,7 @@ I2C_STATUS i2c_send(i2c_handle* i2c_h, i2c_msg_str* msg)
 	return status;
 }
 
-I2C_STATUS i2c_recv(i2c_handle* i2c_h, i2c_msg_str* msg)
+I2C_STATUS i2c_recv(i2c_handle i2c_h, i2c_msg_str* msg)
 {
 	I2C_STATUS status;
 	UCB0I2CSA = msg->destination_address;
@@ -54,7 +54,7 @@ I2C_STATUS i2c_recv(i2c_handle* i2c_h, i2c_msg_str* msg)
 }
 
 I2C_STATUS i2c_recv_pvt(
-		i2c_handle* i2c_h,
+		i2c_str* i2c_h,
 		int8_t* buf,
 		uint8_t len,
 		uint8_t stop)
@@ -96,13 +96,13 @@ I2C_STATUS i2c_recv_pvt(
 	while(UCB0CTLW0 & UCTXSTP);
 	i2c_h->transmission_on = 0;
 
-
+	return I2C_STATUS_OK;
 
 }
 
-i2c_handle* i2c_init(void)
+i2c_handle i2c_init(void)
 {
-	i2c_handle* i2c_h = (i2c_handle*)malloc(sizeof(i2c_handle));
+	i2c_handle i2c_h = (i2c_handle)calloc(1, sizeof(i2c_str));
 
 	get_i2c_h(i2c_h);
 
@@ -124,23 +124,29 @@ i2c_handle* i2c_init(void)
 	}
 
 	UCB0BRW = 15;
+
+	return i2c_h;
 }
 
-void i2c_disable(i2c_handle* i2c_h)
+void i2c_disable(i2c_handle i2c_h)
 {
 	UCB0CTLW0 |= UCTXSTP;
 
 	UCB0CTL1 ^= UCSWRST;
 }
 
-void i2c_enable(i2c_handle* i2c_h)
+void i2c_enable(i2c_handle i2c_h)
 {
 	UCB0CTL1 &= ~UCSWRST;
 
 	//UCB0CTLW0 |= UCTXSTP;
 }
 
-static I2C_STATUS i2c_send_pvt(i2c_handle* i2c_h, int8_t* buf, uint8_t len, uint8_t stop)
+static I2C_STATUS i2c_send_pvt(
+		i2c_str* i2c_h,
+		int8_t* buf,
+		uint8_t len,
+		uint8_t stop)
 {
 	uint8_t byte_ctr = 0;
 
@@ -180,6 +186,8 @@ static I2C_STATUS i2c_send_pvt(i2c_handle* i2c_h, int8_t* buf, uint8_t len, uint
 
 		while(UCB0CTLW0 & UCTXSTP);
 	}
+
+	return I2C_STATUS_OK;
 }
 
 
@@ -216,5 +224,5 @@ __interrupt void USCI_B0_ISR(void)
 
 I2C_STATUS check_i2c_status(void)
 {
-	return 0;
+	return I2C_STATUS_OK;
 }

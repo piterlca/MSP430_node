@@ -1,10 +1,38 @@
-#include "TaskMgr.h"
-#include "MPU-6050/MPU-6050.h"
+#include <stdint.h>
+#include "Wrappers/MPU_wrapper.h"
+#include "Timers/TimerInit.h"
+#include "Timers/ClkSetting.h"
 #include "generalDefs.h"
+#include "TaskMgr.h"
+
 volatile States state = IDLE;
 volatile States last_state = REPORT;
 
-void cycle()
+static void init_mpu(MPU_handle mpu)
+{
+	MPU_init_str mpu_init;
+
+	mpu_init.acc_on = TRUE;
+	mpu_init.gyro_on = TRUE;
+	mpu_init.sample_rate_divider = 0x20;
+
+	MPU_init(mpu, &mpu_init);
+}
+
+TaskMgrHandles* global_init(TaskMgrHandles* handles)
+{
+	init_mpu(handles->mpu->mpu_h);
+
+    setClks();
+
+    timerInit(BYTE_OVERFLOW);
+
+    return handles;
+}
+
+
+
+void cycle(TaskMgrHandles* handles)
 {
 	for(;;)
 	{
@@ -12,8 +40,8 @@ void cycle()
 		{
 			case MEASURE:
 			{
-				if(MPU6050.AccOn == TRUE)	MPU_GetAccData();
-				if(MPU6050.GyroOn == TRUE)	MPU_GetGyroData();
+				if(handles->mpu->AccOn == TRUE)		MPU_GetAccData(handles->mpu->mpu_h);
+				if(handles->mpu->GyroOn == TRUE)	MPU_GetGyroData(handles->mpu->mpu_h);
 				last_state = state;
 				state = IDLE;
 				break;
@@ -21,20 +49,18 @@ void cycle()
 
 			case REPORT:
 			{
-				if(MPU6050.AccOn == TRUE)
+				if(handles->mpu->AccOn == TRUE)
 				{
 					//FilterData(MPU6050.AccData, KalmanForAcc);
 					//UART_print(MPU6050.AccData);
 				}
-				if(MPU6050.GyroOn == TRUE)
+				if(handles->mpu->GyroOn == TRUE)
 				{
 					//FilterData(MPU6050.GyroData, KalmanForGyro);
 					//UART_print(MPU6050.GyroData);
 				}
 				
 				//ProcessToExecution(	MPU6050.GyroData, MPU6050.AccData, NULL	);
-				
-				//printf("%d\t%d\t%d\n", outputBuffer[1], outputBuffer[2], outputBuffer[3]);
 				
 				last_state = state;
 				state = IDLE;

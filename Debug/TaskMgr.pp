@@ -1,15 +1,21 @@
 # FIXED
 
 TaskMgr.obj: ../TaskMgr.c
-TaskMgr.obj: ../TaskMgr.h
-TaskMgr.obj: ../MPU-6050/MPU-6050.h
-TaskMgr.obj: D:/ti/ccsv6/tools/compiler/ti-cgt-msp430_4.4.5/include/stdint.h
-TaskMgr.obj: ../MPU-6050/../SensorsData.h
+TaskMgr.obj: C:/ti/ccsv6/tools/compiler/ti-cgt-msp430_4.4.3/include/stdint.h
+TaskMgr.obj: ../Wrappers/MPU_wrapper.h
+TaskMgr.obj: ../Wrappers/../MPU-6050/MPU-6050.h
+TaskMgr.obj: ../Wrappers/../MPU-6050/../SensorsData.h
+TaskMgr.obj: ../Timers/TimerInit.h
+TaskMgr.obj: ../Timers/ClkSetting.h
 TaskMgr.obj: ../generalDefs.h
+TaskMgr.obj: ../TaskMgr.h
 
 ../TaskMgr.c: 
-../TaskMgr.h: 
-../MPU-6050/MPU-6050.h: 
-D:/ti/ccsv6/tools/compiler/ti-cgt-msp430_4.4.5/include/stdint.h: 
-../MPU-6050/../SensorsData.h: 
+C:/ti/ccsv6/tools/compiler/ti-cgt-msp430_4.4.3/include/stdint.h: 
+../Wrappers/MPU_wrapper.h: 
+../Wrappers/../MPU-6050/MPU-6050.h: 
+../Wrappers/../MPU-6050/../SensorsData.h: 
+../Timers/TimerInit.h: 
+../Timers/ClkSetting.h: 
 ../generalDefs.h: 
+../TaskMgr.h: 

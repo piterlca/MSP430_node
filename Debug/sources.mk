@@ -109,7 +109,8 @@ S64_DEPS__QUOTED :=
 # Every subdirectory with source files must be described here
 SUBDIRS := \
 . \
-USCI_I2C \
+Wrappers \
+Timers \
 MPU-6050 \
 I2C \
 

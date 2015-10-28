@@ -11,9 +11,16 @@
 
 static const unsigned char MPUaddress = 0b1101000;
 
-MPUSensor MPU6050;
+typedef struct MPUSensor{
+	uint8_t ID;
+	uint8_t AccOn;
+	uint8_t GyroOn;
+	TriDimData* AccData;
+	TriDimData* GyroData;
+	i2c_handle i2c_h;
+}MPUSensor;
 
-static const enum{	
+enum{
 	INT_ENABLE = 0x38, 
 	PWR_MGMT_1 = 0x6B, 
 	PWR_MGMT_2 = 0x6C, 
@@ -21,99 +28,107 @@ static const enum{
 	GYRO_X_MSB = 0x43, 
 	ACCEL_CONFIG = 0x1C,
 	SMPRT_DIV = 0x19
-} MPU_Registers;
+};
 
-void MPU_init(uint8_t AccOn, uint8_t GyroOn, uint8_t SampleRateDivider)
+static MPUSensor* init_mpu_struct(MPUSensor* mpu, MPU_init_str* init)
 {
-	I2C_STATUS status;
+	mpu = (MPUSensor*)calloc(1, sizeof(MPUSensor));
+
+	mpu->ID = MPUaddress;
+	if(init->acc_on = mpu->AccOn)
+	{
+		mpu->AccData = (TriDimData*)calloc(	1, sizeof(TriDimData)	);
+	}
+	
+	if(	init->gyro_on = mpu->GyroOn )
+	{
+		mpu->GyroData = (TriDimData*)calloc(	1, sizeof(TriDimData)	);
+	}
+
+	return mpu;
+}
+
+void MPU_init(MPUSensor* mpu, MPU_init_str* init)
+{
 	i2c_msg_str msg;
-	uint8_t buf[2] = {0};
-	i2c_handle* i2c_h =	i2c_init();
-	i2c_enable(i2c_h);
+	int8_t buf[2] = {0};
 
-	MPU6050.ID = MPUaddress;
-	if(	(MPU6050.AccOn = AccOn) == TRUE)
-	{
-		MPU6050.RawAcc = (TriDimData*)calloc(	1, sizeof(TriDimData)	);
-	}
+	mpu = init_mpu_struct(mpu, init);
 	
-	if(	(MPU6050.GyroOn = GyroOn) == TRUE)	
-	{
-		MPU6050.RawGyro = (TriDimData*)calloc(	1, sizeof(TriDimData)	);
-	}
-	
+	mpu->i2c_h = i2c_init();
 
-	msg.destination_address = MPU6050.ID;
+	i2c_enable(mpu->i2c_h);
+
+	msg.destination_address = mpu->ID;
 	msg.generate_stop_after_transmission = 1;
 	msg.i2c_buffer_length = 2;
 	buf[0] = PWR_MGMT_1;
 	buf[1] = 0x00;	// Operating mode = NORMAL
-	msg.i2c_buffer = &buf;
-	status = i2c_send(i2c_h, &msg);
+	msg.i2c_buffer = (int8_t*)&buf;
+	i2c_send(mpu->i2c_h, &msg);
 
 
 	buf[0] = SMPRT_DIV;
-	buf[1] = SampleRateDivider;
-	i2c_send(i2c_h, &msg);
-
+	buf[1] = init->sample_rate_divider;
+	i2c_send(mpu->i2c_h, &msg);
 
 
 	msg.generate_stop_after_transmission = 1;
 	buf[0] = INT_ENABLE;
 	buf[1] = 0x01; //enable data_Rdy interrupt for testing
-	i2c_send(i2c_h, &msg);
-
+	i2c_send(mpu->i2c_h, &msg);
 
 }
 
-void MPU_GetAccData()
+void MPU_GetAccData(MPUSensor* mpu)
 {
-	I2C_STATUS status;
 	i2c_msg_str msg;
 	uint8_t txbuf = 0;
 	uint8_t rxbuf[6] = {0};
-	i2c_handle* i2c_h = NULL;
+	i2c_handle i2c_h = NULL;
 
 	i2c_h = get_i2c_h(i2c_h);
 
-	msg.destination_address = MPU6050.ID;
+	msg.destination_address = mpu->ID;
 	msg.generate_stop_after_transmission = 0;
 	msg.i2c_buffer_length = 1;
-	msg.i2c_buffer = &txbuf;
+	msg.i2c_buffer = (int8_t*)&txbuf;
 	txbuf = ACC_X_MSB;
 	i2c_send(i2c_h, &msg);
 	
 	msg.generate_stop_after_transmission = 1;
 	msg.i2c_buffer_length = 6;
-	msg.i2c_buffer = &rxbuf;
+	msg.i2c_buffer = (int8_t*)&rxbuf;
 	
 	i2c_recv(i2c_h, &msg);
 	
 	//ConvertToStructure(I2C->InputBuffer, MPU6050.RawAcc);
+
+
 }
 
-void MPU_GetGyroData()
+void MPU_GetGyroData(MPUSensor* mpu)
 {
-	I2C_STATUS status;
 	i2c_msg_str msg;
 	uint8_t txbuf = 0;
 	uint8_t rxbuf[6] = {0};
-	i2c_handle* i2c_h = NULL;
+	i2c_handle i2c_h = NULL;
 
 	i2c_h = get_i2c_h(i2c_h);
 
-	msg.destination_address = MPU6050.ID;
+	msg.destination_address = mpu->ID;
 	msg.generate_stop_after_transmission = 0;
 	msg.i2c_buffer_length = 1;
-	msg.i2c_buffer = &txbuf;
+	msg.i2c_buffer = (int8_t*)&txbuf;
 	txbuf = GYRO_X_MSB;
 	i2c_send(i2c_h, &msg);
 	
 	msg.generate_stop_after_transmission = 1;
 	msg.i2c_buffer_length = 6;
-	msg.i2c_buffer = &rxbuf;
+	msg.i2c_buffer = (int8_t*)&rxbuf;
 	
 	i2c_recv(i2c_h, &msg);
+
 }
 
 void ConvertToStructure(int8_t* RawData, TriDimData* mpudata)

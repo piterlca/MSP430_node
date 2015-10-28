@@ -3,31 +3,22 @@
 ################################################################################
 
 # Add inputs and outputs from these tool invocations to the build variables 
-CMD_SRCS += \
-../lnk_msp430fr4133.cmd 
-
 C_SRCS += \
-../TaskMgr.c \
-../main.c 
+../Wrappers/MPU_wrapper.c 
 
 OBJS += \
-./TaskMgr.obj \
-./main.obj 
+./Wrappers/MPU_wrapper.obj 
 
 C_DEPS += \
-./TaskMgr.pp \
-./main.pp 
+./Wrappers/MPU_wrapper.pp 
 
 C_DEPS__QUOTED += \
-"TaskMgr.pp" \
-"main.pp" 
+"Wrappers\MPU_wrapper.pp" 
 
 OBJS__QUOTED += \
-"TaskMgr.obj" \
-"main.obj" 
+"Wrappers\MPU_wrapper.obj" 
 
 C_SRCS__QUOTED += \
-"../TaskMgr.c" \
-"../main.c" 
+"../Wrappers/MPU_wrapper.c" 
 
 

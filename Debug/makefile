@@ -7,11 +7,11 @@ SHELL = cmd.exe
 CG_TOOL_ROOT := C:/ti/ccsv6/tools/compiler/ti-cgt-msp430_4.4.3
 
 ORDERED_OBJS += \
-"./Clksetting.obj" \
 "./TaskMgr.obj" \
-"./TimerInit.obj" \
 "./main.obj" \
-"./USCI_I2C/i2c_MasterHiLevel.obj" \
+"./Wrappers/MPU_wrapper.obj" \
+"./Timers/Clksetting.obj" \
+"./Timers/TimerInit.obj" \
 "./MPU-6050/MPU-6050.obj" \
 "./I2C/i2c_pvt.obj" \
 "../lnk_msp430fr4133.cmd" \
@@ -26,11 +26,13 @@ RMDIR := RMDIR /S/Q
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include subdir_vars.mk
--include USCI_I2C/subdir_vars.mk
+-include Wrappers/subdir_vars.mk
+-include Timers/subdir_vars.mk
 -include MPU-6050/subdir_vars.mk
 -include I2C/subdir_vars.mk
 -include subdir_rules.mk
--include USCI_I2C/subdir_rules.mk
+-include Wrappers/subdir_rules.mk
+-include Timers/subdir_rules.mk
 -include MPU-6050/subdir_rules.mk
 -include I2C/subdir_rules.mk
 -include objects.mk
@@ -158,8 +160,8 @@ HelloWorld.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(EXE_OUTPUTS__QUOTED)$(BIN_OUTPUTS__QUOTED)
-	-$(RM) "Clksetting.pp" "TaskMgr.pp" "TimerInit.pp" "main.pp" "USCI_I2C\i2c_MasterHiLevel.pp" "MPU-6050\MPU-6050.pp" "I2C\i2c_pvt.pp" 
-	-$(RM) "Clksetting.obj" "TaskMgr.obj" "TimerInit.obj" "main.obj" "USCI_I2C\i2c_MasterHiLevel.obj" "MPU-6050\MPU-6050.obj" "I2C\i2c_pvt.obj" 
+	-$(RM) "TaskMgr.pp" "main.pp" "Wrappers\MPU_wrapper.pp" "Timers\Clksetting.pp" "Timers\TimerInit.pp" "MPU-6050\MPU-6050.pp" "I2C\i2c_pvt.pp" 
+	-$(RM) "TaskMgr.obj" "main.obj" "Wrappers\MPU_wrapper.obj" "Timers\Clksetting.obj" "Timers\TimerInit.obj" "MPU-6050\MPU-6050.obj" "I2C\i2c_pvt.obj" 
 	-@echo 'Finished clean'
 	-@echo ' '
 
